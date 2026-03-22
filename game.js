@@ -85,7 +85,6 @@ function loadLevel() {
     }
     
     initPieces();
-    drawChallengeCard();
 }
 
 function initPieces() {
@@ -113,25 +112,6 @@ function initPieces() {
         
         trayDOM.appendChild(pieceDOM);
     });
-}
-
-function drawChallengeCard() {
-    const cardDOM = document.getElementById('challenge-card');
-    cardDOM.innerHTML = '';
-    const targetGrid = LEVELS[currentLevelIndex].board;
-    for(let r=0; r<5; r++) {
-        for(let c=0; c<5; c++) {
-            if(targetGrid[r][c] === 7) {
-                let cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                cell.style.left = `calc(${c} * var(--cell-size-mini))`;
-                cell.style.top = `calc(${r} * var(--cell-size-mini))`;
-                cell.style.backgroundColor = 'var(--color-brick)';
-                cell.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.8)';
-                cardDOM.appendChild(cell);
-            }
-        }
-    }
 }
 
 function onPointerDown(e) {
