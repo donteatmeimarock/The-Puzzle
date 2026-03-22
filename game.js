@@ -1,39 +1,38 @@
 const PIECES = [
     { id: 0, color: 'var(--color-red)', cells: [[0,0], [1,0], [0,1], [1,1]] },
     { id: 1, color: 'var(--color-blue)', cells: [[0,0], [1,0], [2,0], [1,1]] },
-    { id: 2, color: 'var(--color-green)', cells: [[1,0], [1,1], [0,1], [0,2]] },
-    { id: 3, color: 'var(--color-yellow)', cells: [[0,0], [1,0], [2,0]] },
-    { id: 4, color: 'var(--color-purple)', cells: [[1,0], [0,1], [1,1]] },
-    { id: 5, color: 'var(--color-cyan)', cells: [[0,0], [1,0]] },
-    { id: 6, color: 'var(--color-orange)', cells: [[0,0], [0,1]] }
+    { id: 2, color: 'var(--color-green)', cells: [[0,0], [0,1], [0,2], [1,2]] },
+    { id: 3, color: 'var(--color-yellow)', cells: [[1,0], [0,1], [1,1]] },
+    { id: 4, color: 'var(--color-purple)', cells: [[0,0], [1,0]] },
+    { id: 5, color: 'var(--color-cyan)', cells: [[0,0], [0,1]] }
 ];
 
 const LEVELS = [
     {
         board: [
-            [0,0,1,1,1],
-            [0,0,6,1,2],
-            [5,5,6,2,2],
-            [3,3,3,2,4],
-            [7,7,7,4,4]
+            [4,7,0,0,7],
+            [4,7,0,0,7],
+            [1,2,2,2,7],
+            [1,1,3,2,7],
+            [1,3,3,5,5]
         ]
     },
     {
         board: [
-            [0,0,1,1,1],
-            [0,0,7,1,6],
-            [3,3,3,2,6],
-            [5,5,2,2,4],
-            [7,7,2,4,4]
+            [7,4,0,0,7],
+            [7,4,0,0,7],
+            [1,2,2,2,7],
+            [1,1,3,2,7],
+            [1,3,3,5,5]
         ]
     },
     {
         board: [
-            [6,6,2,2,7],
-            [1,2,2,4,3],
-            [1,1,4,4,3],
-            [1,0,0,5,3],
-            [7,0,0,5,7]
+            [5,5,0,0,4],
+            [7,7,0,0,4],
+            [1,2,2,2,7],
+            [1,1,3,2,7],
+            [1,3,3,7,7]
         ]
     }
 ];
@@ -122,14 +121,15 @@ function drawChallengeCard() {
     const targetGrid = LEVELS[currentLevelIndex].board;
     for(let r=0; r<5; r++) {
         for(let c=0; c<5; c++) {
-            let pieceId = targetGrid[r][c];
-            let color = pieceId === 7 ? 'var(--color-brick)' : PIECES[pieceId].color;
-            let cell = document.createElement('div');
-            cell.className = 'mini-cell';
-            cell.style.left = `calc(${c} * var(--cell-size-mini))`;
-            cell.style.top = `calc(${r} * var(--cell-size-mini))`;
-            cell.style.backgroundColor = color;
-            cardDOM.appendChild(cell);
+            if(targetGrid[r][c] === 7) {
+                let cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                cell.style.left = `calc(${c} * var(--cell-size-mini))`;
+                cell.style.top = `calc(${r} * var(--cell-size-mini))`;
+                cell.style.backgroundColor = 'var(--color-brick)';
+                cell.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.8)';
+                cardDOM.appendChild(cell);
+            }
         }
     }
 }
@@ -258,10 +258,9 @@ function removeFromBoard(pieceId) {
 
 function checkWinCondition() {
     let isWin = true;
-    const targetGrid = LEVELS[currentLevelIndex].board;
     for(let r=0; r<5; r++) {
         for(let c=0; c<5; c++) {
-            if(boardState[r][c] !== targetGrid[r][c]) {
+            if(boardState[r][c] === -1) {
                 isWin = false;
                 break;
             }
