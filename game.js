@@ -1,29 +1,56 @@
 const PIECES = [
     { id: 0, color: 'var(--color-red)', cells: [[0,0], [1,0], [0,1], [1,1]] },
-    { id: 1, color: 'var(--color-blue)', cells: [[0,0], [1,0], [2,0]] },
-    { id: 2, color: 'var(--color-green)', cells: [[0,0], [1,0], [2,0], [1,1]] },
-    { id: 3, color: 'var(--color-yellow)', cells: [[2,0], [0,1], [1,1], [2,1]] },
-    { id: 4, color: 'var(--color-purple)', cells: [[3,0], [0,1], [1,1], [2,1], [3,1]] },
+    { id: 1, color: 'var(--color-blue)', cells: [[0,0], [1,0], [2,0], [1,1]] },
+    { id: 2, color: 'var(--color-green)', cells: [[1,0], [1,1], [0,1], [0,2]] },
+    { id: 3, color: 'var(--color-yellow)', cells: [[0,0], [1,0], [2,0]] },
+    { id: 4, color: 'var(--color-purple)', cells: [[1,0], [0,1], [1,1]] },
     { id: 5, color: 'var(--color-cyan)', cells: [[0,0], [1,0]] },
-    { id: 6, color: 'var(--color-orange)', cells: [[0,0], [0,1], [0,2]] }
+    { id: 6, color: 'var(--color-orange)', cells: [[0,0], [0,1]] }
 ];
 
-const TARGET_GRID = [
-    [0, 0, 1, 1, 1],
-    [0, 0, 2, 2, 2],
-    [5, 5, 3, 2, 6],
-    [3, 3, 3, 4, 6],
-    [4, 4, 4, 4, 6]
+const LEVELS = [
+    {
+        board: [
+            [0,0,1,1,1],
+            [0,0,6,1,2],
+            [5,5,6,2,2],
+            [3,3,3,2,4],
+            [7,7,7,4,4]
+        ]
+    },
+    {
+        board: [
+            [0,0,1,1,1],
+            [0,0,7,1,6],
+            [3,3,3,2,6],
+            [5,5,2,2,4],
+            [7,7,2,4,4]
+        ]
+    },
+    {
+        board: [
+            [6,6,2,2,7],
+            [1,2,2,4,3],
+            [1,1,4,4,3],
+            [1,0,0,5,3],
+            [7,0,0,5,7]
+        ]
+    }
 ];
 
+let currentLevelIndex = 0;
 let boardState = Array(5).fill().map(() => Array(5).fill(-1));
 let draggedPiece = null;
 let offsetX = 0, offsetY = 0;
 let isDragging = false;
 
 window.addEventListener('DOMContentLoaded', () => {
-    initPieces();
-    drawChallengeCard();
+    document.getElementById('level-select').addEventListener('change', (e) => {
+        currentLevelIndex = parseInt(e.target.value);
+        loadLevel();
+    });
+
+    loadLevel();
     
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('pointermove', onPointerMove);
@@ -32,8 +59,39 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('restart-btn').addEventListener('click', resetGame);
 });
 
+function loadLevel() {
+    isDragging = false;
+    if(draggedPiece) {
+        draggedPiece.remove();
+        draggedPiece = null;
+    }
+
+    const boardDOM = document.getElementById('game-board');
+    boardDOM.innerHTML = '';
+    
+    boardState = Array(5).fill().map(() => Array(5).fill(-1));
+    const targetGrid = LEVELS[currentLevelIndex].board;
+    
+    for(let r=0; r<5; r++) {
+        for(let c=0; c<5; c++) {
+            if(targetGrid[r][c] === 7) {
+                boardState[r][c] = 7;
+                let brick = document.createElement('div');
+                brick.className = 'brick-cell';
+                brick.style.left = `calc(${c} * var(--cell-size-main))`;
+                brick.style.top = `calc(${r} * var(--cell-size-main))`;
+                boardDOM.appendChild(brick);
+            }
+        }
+    }
+    
+    initPieces();
+    drawChallengeCard();
+}
+
 function initPieces() {
     const trayDOM = document.getElementById('pieces-tray');
+    trayDOM.innerHTML = '';
     PIECES.forEach(p => {
         let pieceDOM = document.createElement('div');
         pieceDOM.className = 'piece';
@@ -61,10 +119,11 @@ function initPieces() {
 function drawChallengeCard() {
     const cardDOM = document.getElementById('challenge-card');
     cardDOM.innerHTML = '';
+    const targetGrid = LEVELS[currentLevelIndex].board;
     for(let r=0; r<5; r++) {
         for(let c=0; c<5; c++) {
-            let pieceId = TARGET_GRID[r][c];
-            let color = PIECES[pieceId].color;
+            let pieceId = targetGrid[r][c];
+            let color = pieceId === 7 ? 'var(--color-brick)' : PIECES[pieceId].color;
             let cell = document.createElement('div');
             cell.className = 'mini-cell';
             cell.style.left = `calc(${c} * var(--cell-size-mini))`;
@@ -199,9 +258,10 @@ function removeFromBoard(pieceId) {
 
 function checkWinCondition() {
     let isWin = true;
+    const targetGrid = LEVELS[currentLevelIndex].board;
     for(let r=0; r<5; r++) {
         for(let c=0; c<5; c++) {
-            if(boardState[r][c] !== TARGET_GRID[r][c]) {
+            if(boardState[r][c] !== targetGrid[r][c]) {
                 isWin = false;
                 break;
             }
@@ -218,6 +278,5 @@ function checkWinCondition() {
 
 function resetGame() {
     document.getElementById('victory-modal').classList.add('hidden');
-    boardState = Array(5).fill().map(() => Array(5).fill(-1));
-    document.querySelectorAll('.piece').forEach(p => returnToTray(p));
+    loadLevel();
 }
